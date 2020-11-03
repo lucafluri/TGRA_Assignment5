@@ -42,7 +42,7 @@ class GraphicsProgram3D:
 
         self.cube = Cube()
 
-        self.sphere = Sphere(24, 48)
+        self.sphere = OptimizedSphere(24, 48)
 
         # self.obj_model = obj_3D_loading.load_obj_file(sys.path[0] + "/models", "smooth_sphere.obj")
 
@@ -222,9 +222,9 @@ class GraphicsProgram3D:
         self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-        glActiveTexture(GL_TEXTURE31)
+        # glActiveTexture(GL_TEXTURE31)
         # glBindTexture(GL_TEXTURE_2D, self.texture_id02)
-        self.sphere.set_vertices(self.shader)
+        # self.sphere.set_vertices(self.shader)
         self.shader.set_material_diffuse(Color(1.0, 1.0, 1.0))
         self.shader.set_material_shininess(10)
         self.model_matrix.push_matrix()
