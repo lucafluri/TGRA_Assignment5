@@ -44,7 +44,7 @@ class GraphicsProgram3D:
 
         self.sphere = OptimizedSphere(24, 48)
 
-        # self.obj_model = obj_3D_loading.load_obj_file(sys.path[0] + "/models", "smooth_sphere.obj")
+        self.obj_model = obj_3D_loading.load_obj_file(sys.path[0] + "/models", "smooth_sphere.obj")
 
         self.clock = pygame.time.Clock()
         self.clock.tick()
@@ -225,7 +225,7 @@ class GraphicsProgram3D:
         # glActiveTexture(GL_TEXTURE31)
         # glBindTexture(GL_TEXTURE_2D, self.texture_id02)
         # self.sphere.set_vertices(self.shader)
-        self.shader.set_material_diffuse(Color(1.0, 1.0, 1.0))
+        self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
         self.shader.set_material_shininess(10)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(8.0, 0.0 , 0.0)  
@@ -233,6 +233,19 @@ class GraphicsProgram3D:
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
+
+        for i in range(8):
+            self.model_matrix.push_matrix()
+            self.model_matrix.add_rotation_x(self.angle * 0.74324 + i * 45)
+            self.model_matrix.add_translation(8, 2, 0)
+            self.model_matrix.add_rotation_x(-self.angle * 0.74324 + i * 45)
+            self.model_matrix.add_scale(1.0, 1.0, 1.0)
+            self.shader.set_model_matrix(self.model_matrix.matrix)
+
+            self.shader.set_material_diffuse(Color(1.0, 1.0, 1.0))
+            self.obj_model.draw(self.shader)
+            self.model_matrix.pop_matrix()
+
 
         pygame.display.flip()
 
