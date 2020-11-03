@@ -73,6 +73,8 @@ class GraphicsProgram3D:
         self.fr_ticker = 0
         self.fr_sum = 0
 
+        self.startTime = time.time()
+
     def load_texture(self, path_string):
         # Loading and Binding Texture
         surface = pygame.image.load(sys.path[0] + path_string)
@@ -85,6 +87,15 @@ class GraphicsProgram3D:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_string)
         return tex_id
+
+    def lerp(self, a, b, t):
+        return (1-t)*a + t*b
+    
+    def getT(self, startT, endT):
+        # Calc current Program time
+        current = time.time() - self.startTime
+        return (current - startT) / (endT - startT)
+
 
     def update(self):
         delta_time = self.clock.tick() / 1000.0
