@@ -35,7 +35,6 @@ varying vec4 v_h4;
 
 uniform vec4 u_mat_diffuse;
 uniform vec4 u_mat_specular;
-uniform vec4 u_mat_emission;
 uniform float u_mat_shininess;
 
 uniform sampler2D u_tex01;
@@ -85,7 +84,7 @@ void main(void)
 
 
 
-	gl_FragColor = u_global_ambient * mat_diffuse + light1Color + light2Color + light3Color + light4Color;
+	gl_FragColor = u_global_ambient * u_mat_diffuse + light1Color + light2Color + light3Color + light4Color;
 
 
 

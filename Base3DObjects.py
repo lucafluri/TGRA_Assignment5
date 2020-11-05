@@ -64,6 +64,9 @@ class Color:
         self.r = r
         self.g = g
         self.b = b
+    
+    def __mul__(self, scalar):
+        return Color(self.r * scalar, self.g * scalar, self.b * scalar)
 
 class Material:
     def __init__(self, diffuse = None, specular = None, shininess = None):

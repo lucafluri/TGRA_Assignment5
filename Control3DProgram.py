@@ -42,7 +42,7 @@ class GraphicsProgram3D:
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         # Turn left
-        self.view_matrix.yaw(90)
+        # self.view_matrix.yaw(90)
 
 
         self.cube = Cube()
@@ -56,24 +56,11 @@ class GraphicsProgram3D:
 
         self.angle = 0
 
-        self.W_key_down = False  
-        self.S_key_down = False  
-        self.A_key_down = False  
-        self.D_key_down = False  
-        self.E_key_down = False  
-        self.Q_key_down = False  
-        self.T_key_down = False  
-        self.G_key_down = False
-        self.LEFT_key_down = False
-        self.RIGHT_key_down = False
-        self.UP_key_down = False
-        self.DOWN_key_down = False
-
-
-        self.white_background = False
 
         self.texture_id01 = self.load_texture("/textures/tex01.png")
         self.texture_id02 = self.load_texture("/textures/tex02.jpg")
+        self.texture_id03 = self.load_texture("/textures/wall.jpg")
+        self.texture_id04 = self.load_texture("/textures/mars.jpg")
 
         self.fr_ticker = 0
         self.fr_sum = 0
@@ -110,11 +97,7 @@ class GraphicsProgram3D:
         else:
             return (current - startT) / (endT - startT)
 
-    # Takes 4 Vectors
-    # def bezier4(self, p1, p2, p3, p4, t):
-    #     # return  p1.__mul__((1-t)**3) + p2.__mul__(3*(1-t)**2 * t) + p3.__mul__(3*(1-t)*t**2) + p4.__mul__(t**3)
-    #     return self.lerp(self.lerp(self.lerp(p1, p2, t), self.lerp(p2, p3, t), t), self.lerp(self.lerp(p2, p3, t), self.lerp(p3, p4, t), t), t)
-
+  
     # Recursive Bezier Function
     # takes an array of vectors 
     def bezier(self, vectors, t):
@@ -166,45 +149,22 @@ class GraphicsProgram3D:
         self.fr_sum += delta_time
         self.fr_ticker += 1
         if self.fr_sum > 1.0:
-            print(self.fr_ticker / self.fr_sum)
+            # print(self.fr_ticker / self.fr_sum)
             self.fr_sum = 0
             self.fr_ticker = 0
+        print(self.getCurrentTime())
 
 
         self.angle += (pi * delta_time) * 180.0/pi
         # if self.angle > 180:
         #     self.angle -= 180
 
-
-        if self.W_key_down:
-            self.view_matrix.slide(0, 0, -10 * delta_time)
-        if self.S_key_down:
-            self.view_matrix.slide(0, 0, 10 * delta_time)
-        if self.A_key_down:
-            self.view_matrix.slide(-10 * delta_time, 0, 0)
-            # self.view_matrix.yaw(180 * delta_time)
-        if self.D_key_down:
-            self.view_matrix.slide(10 * delta_time, 0, 0)
-            # self.view_matrix.yaw(-180 * delta_time)
-        if self.LEFT_key_down:
-            self.view_matrix.yaw(90 * delta_time)
-        if self.RIGHT_key_down:
-            self.view_matrix.yaw(-90 * delta_time)
-        if self.UP_key_down:
-            self.view_matrix.pitch(90 * delta_time)
-        if self.DOWN_key_down:
-            self.view_matrix.pitch(-90 * delta_time)
-
-        if self.T_key_down:
-            self.fov -= 1.5 * delta_time
-        if self.G_key_down:
-            self.fov += 1.5 * delta_time
-
-        
-        
     
 
     def display(self):
+        t = self.getCurrentTime()
+
+
         glEnable(GL_DEPTH_TEST)  ### --- NEED THIS FOR NORMAL 3D BUT MANY EFFECTS BETTER WITH glDisable(GL_DEPTH_TEST) ... try it! --- ###
 
         if self.white_background:
@@ -222,25 +182,70 @@ class GraphicsProgram3D:
         self.shader.set_eye_position(self.view_matrix.eye)
 
 
+        # Textures
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id01)
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id02)
+        glActiveTexture(GL_TEXTURE2)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id03)
+        glActiveTexture(GL_TEXTURE3)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id04)
+
         # Move Camera to end of wall
-        bezCamera1 = self.bezierSpline([Vector(0, 0, 0), Vector(5,-2, 0), Vector(10, -5, 2), Vector(15, -3, 0), Vector(17, -1, 0), Vector(20, 8, 5)], self.getT(0, 15))
+        bezCamera1 = self.bezierSpline([Vector(-1, -1, 0), Vector(5,-2, 0), Vector(10, -5, 2), Vector(15, -3, 0), Vector(17, -1, 0), Vector(20, 8, 5)], self.getT(0, 15))
         self.view_matrix.eye = Point(bezCamera1.x, bezCamera1.y, bezCamera1.z)
 
+        lerpYaw1 = self.lerp(Vector(20, 0, 0), Vector(0, 0, 0), self.getT(1, 6))
+        self.view_matrix.look(self.view_matrix.eye, lerpYaw1, Vector(0, 0, 1))
         
+        # Camera Cut
+        if(t > 15):
+            bezCamera2 = self.bezierSpline([Vector(3, 5, 5), Vector(3, -4, 3)], self.getT(15, 25))
+            self.view_matrix.eye = Point(bezCamera2.x, bezCamera2.y, bezCamera2.z)
+            self.view_matrix.look(self.view_matrix.eye, Vector(8, 0, 5), Vector(0, 0, 1))
+            
+        if(t>25):
+            lerp01 = self.lerp(0.0, 1.0, self.getT(25, 30))
+            lerp10 = self.lerp(1.0, 0.0, self.getT(25, 30))
+            self.view_matrix.look(self.view_matrix.eye, Vector(8, 0, 5), Vector(0, lerp01, lerp10))
+        if(t>30):
+            lerp01 = self.lerp(0.0, 1.0, self.getT(30, 35))
+            lerp10 = self.lerp(1.0, 0.0, self.getT(30, 35))
+            self.view_matrix.look(self.view_matrix.eye, Vector(8, 0, 5), Vector(0, lerp10, lerp01))
+        
+
         #LIGHTS
         self.shader.set_global_ambient(Color(0.01, 0.01, 0.01))
     
         self.shader.set_light1_position(self.view_matrix.eye, 1.0)
         # self.shader.set_light1_position(Point(0.0, 0.0, 50.0), 0.0)
-        self.shader.set_light1_diffuse(0.5, 0.5, 0.5)
-        self.shader.set_light1_specular(0.25, 0.25, 0.25)
-        self.shader.set_light1_ambient(0.15, 0.15, 0.15)
+        self.shader.set_light1_diffuse(Color(0.5, 0.5, 0.5))
+        self.shader.set_light1_specular(Color(0.25, 0.25, 0.25))
+        self.shader.set_light1_ambient(Color(0.15, 0.15, 0.15))
 
-        self.shader.set_light2_position(Point(0, 0, 1), 0.0)
-        # self.shader.set_light2_position(Point(0.0, 0.0, 50.0))
-        self.shader.set_light2_diffuse(0.1, 0.025, 0.025)
-        self.shader.set_light2_specular(0.1, 0.025, 0.025)
-        self.shader.set_light2_ambient(0.1, 0.025, 0.025)
+        self.shader.set_light2_position(Point(self.lerp(0.01, 5.0, self.getT(20, 25)), 0, 1), 0.0)
+        color2 = Color(self.lerp(0.1, 0.5, self.getT(20, 25)), 0.025, 0.02)
+        self.shader.set_light2_diffuse(color2)
+        self.shader.set_light2_specular(color2*0.5)
+        self.shader.set_light2_ambient(color2*0.25)
+
+        if(t>15):
+            bezLight3 = self.bezierSpline([Vector(0, 0, 1), Vector(10, 0, 10), Vector(0, 10, 10), Vector(-10, 0, 10), Vector(0, -10, -10), Vector(10, 0, -10)], self.getT(15, 25))
+            self.shader.set_light3_position(bezLight3, 0.0)
+            # self.shader.set_light3_position(Point(0.0, 0.0, 50.0))
+            color3 = Color(0.05, 0.4, 0.05)
+            self.shader.set_light3_diffuse(color3*1.2)
+            self.shader.set_light3_specular(color3*0.5)
+            self.shader.set_light3_ambient(color3*0.25)
+
+            bezLight4 = self.bezierSpline([Vector(10, 0, -10), Vector(0, -10, -10), Vector(-10, 0, 10), Vector(0, 10, 10), Vector(10, 0, 10), Vector(0, 0, 1)], self.getT(15, 25))
+            self.shader.set_light4_position(bezLight4, 0.0)
+            # self.shader.set_light4_position(Point(0.0, 0.0, 50.0))
+            color4 = Color(0.05, 0.05, 0.4)
+            self.shader.set_light4_diffuse(color4*1.2)
+            self.shader.set_light4_specular(color4*0.5)
+            self.shader.set_light4_ambient(color4*0.25)
         
 
 
@@ -259,10 +264,8 @@ class GraphicsProgram3D:
 
         
         # Mid Wall
-        # glActiveTexture(GL_TEXTURE31)
-        # glBindTexture(GL_TEXTURE_2D, 0)
-        self.shader.set_specular_tex(31)
-        self.shader.set_diffuse_tex(31)
+        self.shader.set_specular_tex(2)
+        self.shader.set_diffuse_tex(2)
         self.shader.set_material_diffuse(Color(0.25, 0.25, 0.25))
         self.shader.set_material_specular(Color(0.5, 0.5, 0.5))
         self.shader.set_material_shininess(0.25)
@@ -277,14 +280,9 @@ class GraphicsProgram3D:
 
 
         
-        glActiveTexture(GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, self.texture_id01)
+        # 2 Cubes with textures
         self.shader.set_diffuse_tex(0)
-        glActiveTexture(GL_TEXTURE1)
-        glBindTexture(GL_TEXTURE_2D, self.texture_id02)
-        self.shader.set_specular_tex(1)
-
-        
+        self.shader.set_specular_tex(1)        
         self.shader.set_material_diffuse(Color(1.0, 1.0, 1.0))
         self.shader.set_material_shininess(10)
         self.model_matrix.push_matrix()
@@ -294,10 +292,8 @@ class GraphicsProgram3D:
         self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-
-        glActiveTexture(GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, self.texture_id02)
-        self.shader.set_diffuse_tex(0) 
+        self.shader.set_diffuse_tex(1) 
+        self.shader.set_specular_tex(1) 
         self.shader.set_material_diffuse(Color(1.0, 1.0, 1.0))
         self.shader.set_material_shininess(10)
         self.model_matrix.push_matrix()
@@ -307,14 +303,14 @@ class GraphicsProgram3D:
         self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-        # BEZIER TESTS
-        bez = self.bezierSpline([Vector(1, 0, 0), Vector(3,0, 0), Vector(3, 0, 5), Vector(4, 3, 5), Vector(0, 0, 0), Vector(8, 0, 0), Vector(8, 0, 10), Vector(5, 0, 5)], self.getT(4, 10))
-        # print(bez.x, bez.y, bez.z)
-        glActiveTexture(GL_TEXTURE31)
-        # glBindTexture(GL_TEXTURE_2D, self.texture_id02)
-        # self.sphere.set_vertices(self.shader)
-        self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
+        # MARS BALL
+        bez = self.bezierSpline([Vector(1, 0, 0), Vector(3,0, 0), Vector(3, 0, 5), Vector(4, 3, 5), Vector(9, 0, 0), Vector(8, 0, 8), Vector(5, 0, 2), Vector(0, 0, -2), Vector(0, 0, -4), Vector(8, -3, 0), Vector(10, 0-3, 0)], self.getT(4, 15))
+
+        self.shader.set_diffuse_tex(3)
+        self.shader.set_specular_tex(3)
+        self.shader.set_material_diffuse(Color(1.0, 1.0, 1.0))
         self.shader.set_material_shininess(10)
+
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(bez.x, bez.y, bez.z)  
         self.model_matrix.add_scale(1, 1, 1)
@@ -322,10 +318,17 @@ class GraphicsProgram3D:
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
 
+
+        # Rotating Ring at (7, -3, 0)
         for i in range(8):
             self.model_matrix.push_matrix()
+            self.model_matrix.add_translation(0, -3, 0)
             self.model_matrix.add_rotation_x(self.angle * 0.74324 + i * 45)
-            self.model_matrix.add_translation(8, 2, 0)
+            
+            if(t>30):
+                self.model_matrix.add_translation(8, self.lerp(4.0, 2.0, self.getT(30, 35)), 0)
+            else:
+                self.model_matrix.add_translation(8, self.lerp(2.0, 4.0, self.getT(20, 25)), 0)
             self.model_matrix.add_rotation_x(-self.angle * 0.74324 + i * 45)
             self.model_matrix.add_scale(1.0, 1.0, 1.0)
             self.shader.set_model_matrix(self.model_matrix.matrix)
@@ -352,56 +355,6 @@ class GraphicsProgram3D:
                         print("Escaping!")
                         exiting = True
                         
-                    if event.key == K_w:
-                        self.W_key_down = True
-                    if event.key == K_s:
-                        self.S_key_down = True
-                    if event.key == K_a:
-                        self.A_key_down = True
-                    if event.key == K_d:
-                        self.D_key_down = True
-                    if event.key == K_e:
-                        self.E_key_down = True
-                    if event.key == K_q:
-                        self.Q_key_down = True
-                    if event.key == K_t:
-                        self.T_key_down = True
-                    if event.key == K_g:
-                        self.G_key_down = True
-                    if event.key == K_LEFT:
-                        self.LEFT_key_down = True
-                    if event.key == K_RIGHT:
-                        self.RIGHT_key_down = True
-                    if event.key == K_UP:
-                        self.UP_key_down = True
-                    if event.key == K_DOWN:
-                        self.DOWN_key_down = True
-
-                elif event.type == pygame.KEYUP:
-                    if event.key == K_w:
-                        self.W_key_down = False
-                    if event.key == K_s:
-                        self.S_key_down = False
-                    if event.key == K_a:
-                        self.A_key_down = False
-                    if event.key == K_d:
-                        self.D_key_down = False
-                    if event.key == K_e:
-                        self.E_key_down = False
-                    if event.key == K_q:
-                        self.Q_key_down = False
-                    if event.key == K_t:
-                        self.T_key_down = False
-                    if event.key == K_g:
-                        self.G_key_down = False
-                    if event.key == K_LEFT:
-                        self.LEFT_key_down = False
-                    if event.key == K_RIGHT:
-                        self.RIGHT_key_down = False
-                    if event.key == K_UP:
-                        self.UP_key_down = False
-                    if event.key == K_DOWN:
-                        self.DOWN_key_down = False
             
             self.update()
             self.display()

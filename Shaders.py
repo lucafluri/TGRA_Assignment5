@@ -57,7 +57,6 @@ class Shader3D:
         self.materialDiffuseLoc			= glGetUniformLocation(self.renderingProgramID, "u_mat_diffuse")
         self.materialSpecularLoc			= glGetUniformLocation(self.renderingProgramID, "u_mat_specular")
         self.materialShininessLoc			= glGetUniformLocation(self.renderingProgramID, "u_mat_shininess")
-        self.materialEmissionLoc			= glGetUniformLocation(self.renderingProgramID, "u_mat_emission")
         
         self.diffuseTextureLoc			= glGetUniformLocation(self.renderingProgramID, "u_tex01")
         self.specularTextureLoc			= glGetUniformLocation(self.renderingProgramID, "u_tex02")
@@ -128,9 +127,6 @@ class Shader3D:
     def set_material_specular(self, color):
         glUniform4f(self.materialSpecularLoc, color.r, color.g, color.b, 1.0)
 
-    def set_material_emission(self, color):
-        glUniform4f(self.materialEmissionLoc, color.r, color.g, color.b, 1.0)
-
     def set_material_shininess(self, shininess):
         glUniform1f(self.materialShininessLoc, shininess)
 
@@ -167,50 +163,50 @@ class Shader3D:
     def set_light1_position(self, pos, positional=1.0):
         glUniform4f(self.light1PosLoc, pos.x, pos.y, pos.z, positional)
 
-    def set_light1_diffuse(self, red, green, blue):
-        glUniform4f(self.light1DiffuseLoc, red, green, blue, 1.0)
+    def set_light1_diffuse(self, color):
+        glUniform4f(self.light1DiffuseLoc, color.r, color.g, color.b, 1.0)
 
-    def set_light1_specular(self, red, green, blue):
-        glUniform4f(self.light1SpecularLoc, red, green, blue, 1.0)
+    def set_light1_specular(self, color):
+        glUniform4f(self.light1SpecularLoc, color.r, color.g, color.b, 1.0)
 
-    def set_light1_ambient(self, red, green, blue):
-        glUniform4f(self.light1AmbientLoc, red, green, blue, 1.0)
+    def set_light1_ambient(self, color):
+        glUniform4f(self.light1AmbientLoc, color.r, color.g, color.b, 1.0)
 
     # LIGHT 2
     def set_light2_position(self, pos, positional=1.0):
         glUniform4f(self.light2PosLoc, pos.x, pos.y, pos.z, positional)
 
-    def set_light2_diffuse(self, red, green, blue):
-        glUniform4f(self.light2DiffuseLoc, red, green, blue, 1.0)
+    def set_light2_diffuse(self, color):
+        glUniform4f(self.light2DiffuseLoc, color.r, color.g, color.b, 1.0)
 
-    def set_light2_specular(self, red, green, blue):
-        glUniform4f(self.light2SpecularLoc, red, green, blue, 1.0)
+    def set_light2_specular(self, color):
+        glUniform4f(self.light2SpecularLoc, color.r, color.g, color.b, 1.0)
 
-    def set_light2_ambient(self, red, green, blue):
-        glUniform4f(self.light2AmbientLoc, red, green, blue, 1.0)
+    def set_light2_ambient(self, color):
+        glUniform4f(self.light2AmbientLoc, color.r, color.g, color.b, 1.0)
 
     # LIGHT 3
     def set_light3_position(self, pos, positional=1.0):
         glUniform4f(self.light3PosLoc, pos.x, pos.y, pos.z, positional)
 
-    def set_light3_diffuse(self, red, green, blue):
-        glUniform4f(self.light3DiffuseLoc, red, green, blue, 1.0)
+    def set_light3_diffuse(self, color):
+        glUniform4f(self.light3DiffuseLoc, color.r, color.g, color.b, 1.0)
 
-    def set_light3_specular(self, red, green, blue):
-        glUniform4f(self.light3SpecularLoc, red, green, blue, 1.0)
+    def set_light3_specular(self, color):
+        glUniform4f(self.light3SpecularLoc, color.r, color.g, color.b, 1.0)
 
-    def set_light3_ambient(self, red, green, blue):
-        glUniform4f(self.light3AmbientLoc, red, green, blue, 1.0)
+    def set_light3_ambient(self, color):
+        glUniform4f(self.light3AmbientLoc, color.r, color.g, color.b, 1.0)
 
     # LIGHT 4
     def set_light4_position(self, pos, positional=1.0):
         glUniform4f(self.light4PosLoc, pos.x, pos.y, pos.z, positional)
 
-    def set_light4_diffuse(self, red, green, blue):
-        glUniform4f(self.light4DiffuseLoc, red, green, blue, 1.0)
+    def set_light4_diffuse(self, color):
+        glUniform4f(self.light4DiffuseLoc, color.r, color.g, color.b, 1.0)
 
-    def set_light4_specular(self, red, green, blue):
-        glUniform4f(self.light4SpecularLoc, red, green, blue, 1.0)
+    def set_light4_specular(self, color):
+        glUniform4f(self.light4SpecularLoc, color.r, color.g, color.b, 1.0)
 
-    def set_light4_ambient(self, red, green, blue):
-        glUniform4f(self.light4AmbientLoc, red, green, blue, 1.0)
+    def set_light4_ambient(self, color):
+        glUniform4f(self.light4AmbientLoc, color.r, color.g, color.b, 1.0)
