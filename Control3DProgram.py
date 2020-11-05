@@ -220,11 +220,28 @@ class GraphicsProgram3D:
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.shader.set_eye_position(self.view_matrix.eye)
-        self.shader.set_light_position(self.view_matrix.eye)
-        # self.shader.set_light_position(Point(0.0, 0.0, 50.0))
-        self.shader.set_light_diffuse(1.0, 1.0, 1.0)
-        self.shader.set_light_specular(1.0, 1.0, 1.0)
-        self.shader.set_light_ambient(0.15, 0.15, 0.15)
+
+
+        # Move Camera to end of wall
+        bezCamera1 = self.bezierSpline([Vector(0, 0, 0), Vector(5,-2, 0), Vector(10, -5, 2), Vector(15, -3, 0), Vector(17, -1, 0), Vector(20, 8, 5)], self.getT(0, 15))
+        self.view_matrix.eye = Point(bezCamera1.x, bezCamera1.y, bezCamera1.z)
+
+        
+        #LIGHTS
+        self.shader.set_global_ambient(Color(0.01, 0.01, 0.01))
+    
+        self.shader.set_light1_position(self.view_matrix.eye, 1.0)
+        # self.shader.set_light1_position(Point(0.0, 0.0, 50.0), 0.0)
+        self.shader.set_light1_diffuse(0.5, 0.5, 0.5)
+        self.shader.set_light1_specular(0.25, 0.25, 0.25)
+        self.shader.set_light1_ambient(0.15, 0.15, 0.15)
+
+        self.shader.set_light2_position(Point(0, 0, 1), 0.0)
+        # self.shader.set_light2_position(Point(0.0, 0.0, 50.0))
+        self.shader.set_light2_diffuse(0.1, 0.025, 0.025)
+        self.shader.set_light2_specular(0.1, 0.025, 0.025)
+        self.shader.set_light2_ambient(0.1, 0.025, 0.025)
+        
 
 
 
@@ -257,9 +274,6 @@ class GraphicsProgram3D:
         self.model_matrix.pop_matrix()
 
 
-        # Move Camera to end of wall
-        bezCamera1 = self.bezierSpline([Vector(0, 0, 0), Vector(5,-2, 0), Vector(10, -5, 2), Vector(15, -3, 0), Vector(17, -1, 0), Vector(20, 8, 5)], self.getT(0, 15))
-        self.view_matrix.eye = Point(bezCamera1.x, bezCamera1.y, bezCamera1.z)
 
 
         

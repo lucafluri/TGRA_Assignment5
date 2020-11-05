@@ -10,13 +10,25 @@ uniform mat4 u_projection_matrix;
 
 uniform vec4 u_eye_position;
 
-uniform vec4 u_light_position;
+varying vec2 v_uv;
+varying vec4 v_normal;
+
+
+uniform vec4 u_light1_position;
+uniform vec4 u_light2_position;
+uniform vec4 u_light3_position;
+uniform vec4 u_light4_position;
 
 // varying vec4 v_color;  //Leave the varying variables alone to begin with
-varying vec4 v_normal;
-varying vec4 v_s;
-varying vec4 v_h;
-varying vec2 v_uv;
+varying vec4 v_s1;
+varying vec4 v_h1;
+varying vec4 v_s2;
+varying vec4 v_h2;
+varying vec4 v_s3;
+varying vec4 v_h3;
+varying vec4 v_s4;
+varying vec4 v_h4;
+
 
 void main(void)
 {
@@ -32,11 +44,38 @@ void main(void)
 	position = u_model_matrix * position;
 	v_normal = normalize(u_model_matrix * normal);
 
-	// Global Coordinates
-	v_s = normalize(u_light_position - position);
-	
 	vec4 v = normalize(u_eye_position - position);
-	v_h = normalize(v_s + v);
+
+	// Global Coordinates
+	// Check for positional Light: 0:directional, 1:positional
+
+	// LIGHT 1
+	v_s1 = u_light1_position;
+	if(u_light1_position[3] == 1.0){
+		v_s1 = normalize(u_light1_position - position);
+	}
+	v_h1 = normalize(v_s1 + v);
+
+	// LIGHT 2
+	v_s2 = u_light2_position;
+	if(u_light2_position[3] == 1.0){
+		v_s2 = normalize(u_light2_position - position);
+	}
+	v_h2 = normalize(v_s2 + v);
+
+	// LIGHT 3
+	v_s3 = u_light3_position;
+	if(u_light3_position[3] == 1.0){
+		v_s3 = normalize(u_light3_position - position);
+	}
+	v_h3 = normalize(v_s3 + v);
+
+	// LIGHT 4
+	v_s4 = u_light4_position;
+	if(u_light4_position[3] == 1.0){
+		v_s4 = normalize(u_light4_position - position);
+	}
+	v_h4 = normalize(v_s4 + v);
 
 	
 
