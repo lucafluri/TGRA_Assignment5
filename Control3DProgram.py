@@ -111,11 +111,12 @@ class GraphicsProgram3D:
             return (current - startT) / (endT - startT)
 
     # Takes 4 Vectors
-    def bezier4(self, p1, p2, p3, p4, t):
-        # return  p1.__mul__((1-t)**3) + p2.__mul__(3*(1-t)**2 * t) + p3.__mul__(3*(1-t)*t**2) + p4.__mul__(t**3)
-        return self.lerp(self.lerp(self.lerp(p1, p2, t), self.lerp(p2, p3, t), t), self.lerp(self.lerp(p2, p3, t), self.lerp(p3, p4, t), t), t)
+    # def bezier4(self, p1, p2, p3, p4, t):
+    #     # return  p1.__mul__((1-t)**3) + p2.__mul__(3*(1-t)**2 * t) + p3.__mul__(3*(1-t)*t**2) + p4.__mul__(t**3)
+    #     return self.lerp(self.lerp(self.lerp(p1, p2, t), self.lerp(p2, p3, t), t), self.lerp(self.lerp(p2, p3, t), self.lerp(p3, p4, t), t), t)
 
     # Recursive Bezier Function
+    # takes an array of vectors 
     def bezier(self, vectors, t):
         vectors_new = []
         if(len(vectors) > 2):
