@@ -130,8 +130,6 @@ class Shader3D:
     def set_specular_tex(self, number):
         glUniform1i(self.specularTextureLoc, number)
 
-        
-
     def set_attribute_buffers(self, vertex_buffer_id):
         glUniform1f(self.usingTextureLoc, 0.0)
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id)

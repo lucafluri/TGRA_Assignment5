@@ -26,6 +26,7 @@ class GraphicsProgram3D:
         self.shader = Shader3D()  
         self.shader.use()
 
+
         self.model_matrix = ModelMatrix()
 
         self.view_matrix = ViewMatrix()
@@ -39,6 +40,10 @@ class GraphicsProgram3D:
         # self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
         self.projection_matrix.set_perspective(120, 800/600, 0.001, 10 )
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
+
+        # Turn left
+        self.view_matrix.yaw(90)
+
 
         self.cube = Cube()
 
@@ -89,12 +94,70 @@ class GraphicsProgram3D:
         return tex_id
 
     def lerp(self, a, b, t):
-        return (1-t)*a + t*b
+        return a.__mul__(1-t) + b.__mul__(t)
+
+    def getCurrentTime(self):
+        # Calc current Program time
+        return time.time() - self.startTime
     
     def getT(self, startT, endT):
         # Calc current Program time
-        current = time.time() - self.startTime
-        return (current - startT) / (endT - startT)
+        current = self.getCurrentTime()
+        if current < startT:
+            return 0
+        elif current > endT:
+            return 1
+        else:
+            return (current - startT) / (endT - startT)
+
+    # Takes 4 Vectors
+    def bezier4(self, p1, p2, p3, p4, t):
+        # return  p1.__mul__((1-t)**3) + p2.__mul__(3*(1-t)**2 * t) + p3.__mul__(3*(1-t)*t**2) + p4.__mul__(t**3)
+        return self.lerp(self.lerp(self.lerp(p1, p2, t), self.lerp(p2, p3, t), t), self.lerp(self.lerp(p2, p3, t), self.lerp(p3, p4, t), t), t)
+
+    # Recursive Bezier Function
+    def bezier(self, vectors, t):
+        vectors_new = []
+        if(len(vectors) > 2):
+            for i in range(len(vectors) - 1):
+                vectors_new.append(self.lerp(vectors[i], vectors[i + 1], t))
+            return self.bezier(vectors_new, t)
+        else:
+            return self.lerp(vectors[0], vectors[1], t)
+        
+    def bezierSpline(self, vectors, t):
+        # Build Segments
+        # Add first 4 points
+        arrays = [vectors[:4]]
+        vectors = vectors[4:]
+
+        # Add subsequent 2 points
+        for _ in range((int) (len(vectors) / 2)):
+            arrays.append(vectors[:2])
+            vectors = vectors[2:]
+        arrays.append(vectors)
+
+
+        for i in range(len(arrays)):
+            if i == 0:
+                continue
+            if(len(arrays[i]) == 0):
+                continue
+            arrays[i].insert(0, arrays[i-1][3])
+            arrays[i].insert(1, arrays[i][0] + (arrays[i-1][3] - arrays[i-1][2]))
+
+        # Flatten List
+        flat = []
+        for arr in arrays:
+            flat += arr
+
+        return self.bezier(flat, t)
+
+
+    
+
+
+
 
 
     def update(self):
@@ -151,18 +214,18 @@ class GraphicsProgram3D:
 
         glViewport(0, 0, 800, 600)
 
-        self.projection_matrix.set_perspective(self.fov, 800/600, 0.001, 10 )
+        self.projection_matrix.set_perspective(self.fov, 800/600, 0.001, 50 )
+
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
-
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
-
         self.shader.set_eye_position(self.view_matrix.eye)
-
         self.shader.set_light_position(self.view_matrix.eye)
         # self.shader.set_light_position(Point(0.0, 0.0, 50.0))
         self.shader.set_light_diffuse(1.0, 1.0, 1.0)
         self.shader.set_light_specular(1.0, 1.0, 1.0)
-        self.shader.set_light_ambient(0.1, 0.1, 0.05)
+        self.shader.set_light_ambient(0.15, 0.15, 0.15)
+
+
 
         self.shader.set_material_specular(Color(1.0, 1.0, 1.0))
         self.shader.set_material_shininess(5.0)
@@ -175,34 +238,30 @@ class GraphicsProgram3D:
         self.cube.set_vertices(self.shader)
         # self.sphere.set_vertices(self.shader)
 
-        # # Floor
-        # self.shader.set_material_diffuse(1.0, 1.0, 1.0)
-        # self.model_matrix.push_matrix()
-        # self.model_matrix.add_translation(0.0, 0.0 , 0.0)  
-        # self.model_matrix.add_scale(100, 100, 0.1)
-        # self.shader.set_model_matrix(self.model_matrix.matrix)
-        # self.cube.draw(self.shader)
-        # self.model_matrix.pop_matrix()
 
-        # # Walls
-        # for wall in self.walls:
-        #     x, y, xlength, ylength = wall
-        #     if self.checkWallCollision(x, y, xlength, ylength):
-        #         self.drawWall(x, y, xlength, ylength, [0.0, 1.0, 0.0])
-        #     else:
-        #         self.drawWall(x, y, xlength, ylength)
-
-        # Rotating Cube
-        # if self.checkWallCollision(8, 0, sqrt(2), sqrt(2)):
-        #     self.weirdObjectColor=[random(), random(), random()]
-        # self.drawWeirdRotatingObject()
-
-        # glActiveTexture(GL_TEXTURE0)
-        # glBindTexture(GL_TEXTURE_2D, self.tex_id)
-        # self.shader.set_diffuse_texture(self.tex_id)
         
+        # Mid Wall
+        # glActiveTexture(GL_TEXTURE31)
+        # glBindTexture(GL_TEXTURE_2D, 0)
+        self.shader.set_specular_tex(31)
+        self.shader.set_diffuse_tex(31)
+        self.shader.set_material_diffuse(Color(0.25, 0.25, 0.25))
+        self.shader.set_material_specular(Color(0.5, 0.5, 0.5))
+        self.shader.set_material_shininess(0.25)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(10.0, 8.0 , 4.0)  
+        self.model_matrix.add_scale(20, 1, 8)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw(self.shader)
+        self.model_matrix.pop_matrix()
 
-        #####################################################
+
+        # Move Camera to end of wall
+        bezCamera1 = self.bezierSpline([Vector(0, 0, 0), Vector(5,-2, 0), Vector(10, -5, 2), Vector(15, -3, 0), Vector(17, -1, 0), Vector(20, 8, 5)], self.getT(0, 15))
+        self.view_matrix.eye = Point(bezCamera1.x, bezCamera1.y, bezCamera1.z)
+
+
+        
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, self.texture_id01)
         self.shader.set_diffuse_tex(0)
@@ -233,13 +292,16 @@ class GraphicsProgram3D:
         self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
-        # glActiveTexture(GL_TEXTURE31)
+        # BEZIER TESTS
+        bez = self.bezierSpline([Vector(1, 0, 0), Vector(3,0, 0), Vector(3, 0, 5), Vector(4, 3, 5), Vector(0, 0, 0), Vector(8, 0, 0), Vector(8, 0, 10), Vector(5, 0, 5)], self.getT(4, 10))
+        # print(bez.x, bez.y, bez.z)
+        glActiveTexture(GL_TEXTURE31)
         # glBindTexture(GL_TEXTURE_2D, self.texture_id02)
         # self.sphere.set_vertices(self.shader)
         self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
         self.shader.set_material_shininess(10)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(8.0, 0.0 , 0.0)  
+        self.model_matrix.add_translation(bez.x, bez.y, bez.z)  
         self.model_matrix.add_scale(1, 1, 1)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
